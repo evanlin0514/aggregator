@@ -27,22 +27,23 @@ func getFilePath(file string) (string, error) {
 	return filepath.Join(path,file), err
 }
 
-func Read(file string, c *Config) error {
+func Read(file string) (Config, error) {
+	var c Config
 	path, err := getFilePath(file)
 	if err != nil {
-		return err
+		return c, err
 	}
 
 	data, err := os.ReadFile(path)
 	if err != nil {
-		return fmt.Errorf("error reading file: %v", err)
+		return c, fmt.Errorf("error reading file: %v", err)
 	}
 
 	err = json.Unmarshal(data, &c)
 	if err != nil {
-		return fmt.Errorf("error unmarshaling JSON: %v", err)
+		return c, fmt.Errorf("error unmarshaling JSON: %v", err)
 	}
-	return nil
+	return c, nil
 }
 
 func write(file string, c Config) error {

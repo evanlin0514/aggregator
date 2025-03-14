@@ -6,8 +6,7 @@ import (
 )
 
 func main() {
-    file := config.Config{} 
-    err := config.Read(".gatorconfig.json", &file)
+    file, err := config.Read(".gatorconfig.json")
     if err != nil {
         fmt.Println(err)
     }
@@ -17,9 +16,10 @@ func main() {
         fmt.Println(err)
     }
 
-    err = config.Read("gatorconfig.json", &file)
+    newFile, err := config.Read(".gatorconfig.json")
     if err != nil {
         fmt.Println(err)
     }
     fmt.Println(file)
+    fmt.Println(newFile)
 }
