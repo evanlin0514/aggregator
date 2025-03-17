@@ -1,8 +1,10 @@
 package main
 
 import (
-    "github.com/evanlin0514/aggregator/internal/config"
-    "fmt"
+	"fmt"
+	"os"
+
+	"github.com/evanlin0514/aggregator/internal/config"
 )
 
 func main() {
@@ -10,17 +12,11 @@ func main() {
     if err != nil {
         fmt.Println(err)
     }
-    
-    err = file.SetUser("Evan")
-    if err != nil {
-        fmt.Println(err)
+    state := config.State{
+        Pointer: &file,
     }
     
+    var cmds config.Commands
+    cmds.Register("login", config.HandlerLogin(&state, os.Args))
 
-    newFile, err := config.Read()
-    if err != nil {
-        fmt.Println(err)
-    }
-
-    fmt.Println(newFile)
 }

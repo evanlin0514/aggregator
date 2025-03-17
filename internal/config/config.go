@@ -14,6 +14,19 @@ type Config struct {
 	CurrentUser string  `json:"current_user_name"`
 }
 
+type State struct {
+	Pointer *Config	
+}
+
+type Command struct {
+	Name string
+	Args []string
+}
+
+type Commands struct {
+	Handlers map[string]func(*State, Command)error 
+}
+
 func getFilePath(file string) (string, error) {
 	path, err := os.UserHomeDir()
 	if err != nil {
@@ -69,6 +82,33 @@ func (c *Config) SetUser (name string) error {
 	return write(*c)
 }
 
+func HandlerLogin(s *State, cmd Command) error{
+	if len(cmd.Args) != 1{
+		return fmt.Errorf("invalid cmd args")
+	}
+	if err := s.Pointer.SetUser(cmd.Args[0]); err != nil{
+		return err
+	}
+	fmt.Printf("successfully set user! username: %v\n", cmd.Args[0])
+	return nil
+}
 
+func (c *Commands) Register(name string, f func(*State, Command) error) {
+	c.Handlers[name] = f
+}
+
+func (c *Commands) Run (s *State, cmd Command) error{
+	f, ok := c.Handlers[cmd.Name]
+	if !ok {
+		return fmt.Errorf("handler not exist")
+	}
+
+	err := f(s, cmd)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
 
 
