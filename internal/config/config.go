@@ -83,13 +83,13 @@ func (c *Config) SetUser (name string) error {
 }
 
 func HandlerLogin(s *State, cmd Command) error{
-	if len(cmd.Args) != 1{
-		return fmt.Errorf("invalid cmd args")
+	if len(cmd.Args) < 2 {
+		return fmt.Errorf("invalid input")
 	}
-	if err := s.Pointer.SetUser(cmd.Args[0]); err != nil{
+	if err := s.Pointer.SetUser(cmd.Args[1]); err != nil{
 		return err
 	}
-	fmt.Printf("successfully set user! username: %v\n", cmd.Args[0])
+	fmt.Printf("successfully set user! username: %v\n", cmd.Args[1])
 	return nil
 }
 
