@@ -17,18 +17,17 @@ func main() {
         Pointer: &file,
     }
 
-    input := os.Args[1:]
-    loginCmd := config.Command{
-        Name: "login",
-        Args: input,
+    cmd := config.Command{
+        Name: os.Args[1],
+        Args: os.Args[1:],
     }
 
     cmds := config.Commands{
         Handlers: make(map[string]func(*config.State, config.Command) error),
     }
-    cmds.Register(loginCmd.Name, config.HandlerLogin)
+    cmds.Register(cmd.Name, config.HandlerLogin)
 
-    err = cmds.Run(&state, loginCmd)
+    err = cmds.Run(&state, cmd)
     if err != nil {
         fmt.Printf("error when runing %v\n", err)
         os.Exit(1)
