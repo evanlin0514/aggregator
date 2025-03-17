@@ -7,7 +7,7 @@ import (
 	"os"
 )
 
-const configFileName = ".gotorconfig.json"
+const configFileName = ".gatorconfig.json"
 
 type Config struct {
 	DbUrl string `json:"db_url"`
@@ -20,18 +20,18 @@ func getFilePath(file string) (string, error) {
 		return "", fmt.Errorf("error getting home dir: %v", err)
 	}
 
-	if _, err := os.Stat(filepath.Join(path,file)); os.IsNotExist(err) {
-		return "", fmt.Errorf("file does not exist: %v", filepath.Join(path, file))
-	}
-
 	return filepath.Join(path,file), err
 }
 
-func Read(file string) (Config, error) {
+func Read() (Config, error) {
 	var c Config
-	path, err := getFilePath(file)
+	path, err := getFilePath(configFileName)
 	if err != nil {
 		return c, err
+	}
+
+	if _, err := os.Stat(path); os.IsNotExist(err){
+		return c, fmt.Errorf("config file does not exist: %v", err)
 	}
 
 	data, err := os.ReadFile(path)
@@ -46,12 +46,18 @@ func Read(file string) (Config, error) {
 	return c, nil
 }
 
-func write(file string, c Config) error {
+func write(c Config) error {
 	djson, err := json.Marshal(c)
 	if err != nil {
 		return fmt.Errorf("error marshaling struct: %v", err)
 	}
-	err = os.WriteFile(file, djson, 0644)
+
+	path, err := getFilePath(configFileName)
+	if err != nil {
+		return err
+	}
+	
+	err = os.WriteFile(path, djson, 0644)
 	if err != nil {
 		return fmt.Errorf("error writing file: %v", err)
 	}
@@ -60,15 +66,7 @@ func write(file string, c Config) error {
 
 func (c *Config) SetUser (name string) error {
 	c.CurrentUser = name
-	path, err := getFilePath(configFileName)
-	if err != nil {
-		return err
-	}
-	err = write(path, *c)
-	if err != nil {
-		return err
-	}
-	return nil
+	return write(*c)
 }
 
 
