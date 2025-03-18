@@ -17,9 +17,15 @@ func main() {
         Pointer: &file,
     }
 
+    if len(os.Args) < 3 {
+        fmt.Println("invlid input")
+		os.Exit(1)
+	}
+
+    input := os.Args
     cmd := config.Command{
-        Name: os.Args[1],
-        Args: os.Args[1:],
+        Name: input[1],
+        Args: input[2:],
     }
 
     cmds := config.Commands{
