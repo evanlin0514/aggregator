@@ -5,7 +5,14 @@ import (
 	"os"
 
 	"github.com/evanlin0514/aggregator/internal/config"
+	"github.com/evanlin0514/aggregator/internal/database"
+	_ "github.com/lib/pq"
 )
+
+type state struct {
+    db *database.Queries
+    cfg *config.Config
+}
 
 func main() {
     file, err := config.Read()
@@ -38,4 +45,5 @@ func main() {
         fmt.Printf("error when runing %v\n", err)
         os.Exit(1)
     }
+
 }
