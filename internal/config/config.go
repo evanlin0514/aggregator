@@ -1,10 +1,15 @@
 package config
 
 import (
+	"context"
 	"encoding/json"
-	"path/filepath"
 	"fmt"
 	"os"
+	"path/filepath"
+	"strings"
+	"time"
+	"github.com/evanlin0514/aggregator/internal/database"
+	"github.com/google/uuid"
 )
 
 const configFileName = ".gatorconfig.json"
@@ -15,6 +20,7 @@ type Config struct {
 }
 
 type State struct {
+	Db *database.Queries
 	Pointer *Config	
 }
 
@@ -83,15 +89,46 @@ func (c *Config) SetUser (name string) error {
 }
 
 func HandlerLogin(s *State, cmd Command) error{
-	if err := s.Pointer.SetUser(cmd.Args[0]); err != nil{
-		return err
+	_, err := s.Db.GetUser(context.Background(), cmd.Args[0])
+	if err != nil{
+		return fmt.Errorf("no user found: %v", err)
 	}
-	fmt.Printf("successfully set user! username: %v\n", cmd.Args[0])
+	s.Pointer.SetUser(cmd.Args[0])
+	fmt.Printf("successfully swtich to user: %v \n", cmd.Args[0])
 	return nil
 }
 
 func (c *Commands) Register(name string, f func(*State, Command) error) {
 	c.Handlers[name] = f
+}
+
+func HandlerRegister(s *State, cmd Command) error {
+	if len(cmd.Args) != 1 {
+		return fmt.Errorf("usage: %s <name>", cmd.Name)
+	}
+	username := cmd.Args[0]
+
+	params := database.CreateUserParams{
+		ID: uuid.New(),
+		CreateAt: time.Now(),
+		UpdateAt: time.Now(),
+		Name: username,
+	}
+
+	newUser, err := s.Db.CreateUser(context.Background(), params)
+	if err != nil {
+		if strings.Contains(err.Error(), "duplicate key"){
+			return fmt.Errorf("user already exists")
+		}
+		return fmt.Errorf("error creating user: %v", err)
+	}
+
+	if err := s.Pointer.SetUser(username); err != nil{
+		return err
+	}
+
+	fmt.Printf("User created: %v\n", newUser.Name)
+	return nil
 }
 
 func (c *Commands) Run (s *State, cmd Command) error{

@@ -1,7 +1,8 @@
 package main
 
 import (
-	"fmt"
+	"database/sql"
+	"log"
 	"os"
 
 	"github.com/evanlin0514/aggregator/internal/config"
@@ -9,24 +10,28 @@ import (
 	_ "github.com/lib/pq"
 )
 
-type state struct {
-    db *database.Queries
-    cfg *config.Config
-}
 
 func main() {
     file, err := config.Read()
     if err != nil {
-        fmt.Println(err)
-        os.Exit(1)
-    }
-    state := config.State{
-        Pointer: &file,
+        log.Fatalf("Error loading config: %v", err)
     }
 
+    db, err := sql.Open("postgres", file.DbUrl)
+    if err != nil {
+        log.Fatalf("Error connecting to the database: %v", err )
+    }
+
+    dbQueries := database.New(db)
+
+    state := &config.State{
+        Pointer: &file,
+        Db: dbQueries,
+    }
+
+
     if len(os.Args) < 3 {
-        fmt.Println("invlid input")
-		os.Exit(1)
+        log.Fatal("invalid input")
 	}
 
     input := os.Args
@@ -38,12 +43,14 @@ func main() {
     cmds := config.Commands{
         Handlers: make(map[string]func(*config.State, config.Command) error),
     }
-    cmds.Register(cmd.Name, config.HandlerLogin)
 
-    err = cmds.Run(&state, cmd)
+    cmds.Register("login", config.HandlerLogin)
+    cmds.Register("register", config.HandlerRegister)
+
+    err = cmds.Run(state, cmd)
     if err != nil {
-        fmt.Printf("error when runing %v\n", err)
-        os.Exit(1)
+        log.Fatalf("Error runing command: %v", err)
     }
+    
 
 }
