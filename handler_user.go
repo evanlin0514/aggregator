@@ -48,3 +48,15 @@ func handlerRegister(s *state, cmd command) error {
 	fmt.Printf("User created: %v\n", newUser.Name)
 	return nil
 }
+
+func handlerReset(s *state, cmd command) error {
+	if len(cmd.args) == 1 {
+		return fmt.Errorf("invlid input")
+	}
+
+	err := s.db.Reset(context.Background())
+	if err != nil {
+		return fmt.Errorf("error reset table: %v", err)
+	}
+	return nil
+}
