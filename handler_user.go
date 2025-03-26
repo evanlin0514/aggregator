@@ -58,6 +58,8 @@ func handlerReset(s *state, cmd command) error {
 	if err != nil {
 		return fmt.Errorf("error reset table: %v", err)
 	}
+
+	fmt.Println("table is reset")
 	return nil
 }
 
@@ -71,12 +73,17 @@ func handlerUsers(s *state, cmd command) error {
 		return fmt.Errorf("error retriving users: %v", err)
 	}
 
-	for _, user := range users{
-		if user == s.pointer.CurrentUser {
-			fmt.Printf("* %v (current)\n", user)
+	if len(users) > 0 {
+		for _, user := range users{
+			if user == s.pointer.CurrentUser {
+				fmt.Printf("* %v (current)\n", user)
+			} else {
+				fmt.Printf("* %v \n", user)
+			}
 		}
-		fmt.Printf("* %v \n", user)
+	} else {
+		fmt.Println("the table is empty")
 	}
-	
+
 	return nil
 }

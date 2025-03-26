@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"log"
 	"os"
-
 	"github.com/evanlin0514/aggregator/internal/config"
 	"github.com/evanlin0514/aggregator/internal/database"
 	_ "github.com/lib/pq"
@@ -33,10 +32,6 @@ func main() {
         db: dbQueries,
     }
 
-
-    if len(os.Args) < 3 {
-        log.Fatal("invalid input")
-	}
 
     input := os.Args
     cmd := command{
