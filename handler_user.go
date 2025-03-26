@@ -10,7 +10,7 @@ import (
 )
 
 func handlerLogin(s *state, cmd command) error{
-	_, err := s.db.GetUser(context.Background(), cmd.args[0])
+	_, err := s.db.CheckUser(context.Background(), cmd.args[0])
 	if err != nil{
 		return fmt.Errorf("no user found: %v", err)
 	}
@@ -58,5 +58,25 @@ func handlerReset(s *state, cmd command) error {
 	if err != nil {
 		return fmt.Errorf("error reset table: %v", err)
 	}
+	return nil
+}
+
+func handlerUsers(s *state, cmd command) error {
+	if len(cmd.args) == 1 {
+		return fmt.Errorf("invlid input")
+	}	
+	
+	users, err := s.db.GetUser(context.Background())
+	if err != nil {
+		return fmt.Errorf("error retriving users: %v", err)
+	}
+
+	for _, user := range users{
+		if user == s.pointer.CurrentUser {
+			fmt.Printf("* %v (current)\n", user)
+		}
+		fmt.Printf("* %v \n", user)
+	}
+	
 	return nil
 }
