@@ -10,6 +10,10 @@ import (
 	_ "github.com/lib/pq"
 )
 
+type state struct{
+    db *database.Queries
+    pointer *config.Config
+}
 
 func main() {
     file, err := config.Read()
@@ -24,9 +28,9 @@ func main() {
 
     dbQueries := database.New(db)
 
-    state := &config.State{
-        Pointer: &file,
-        Db: dbQueries,
+    programState := &state{
+        pointer: &file,
+        db: dbQueries,
     }
 
 
@@ -35,19 +39,19 @@ func main() {
 	}
 
     input := os.Args
-    cmd := config.Command{
-        Name: input[1],
-        Args: input[2:],
+    cmd := command{
+        name: input[1],
+        args: input[2:],
     }
 
-    cmds := config.Commands{
-        Handlers: make(map[string]func(*config.State, config.Command) error),
+    cmds := commands{
+        Handlers: make(map[string]func(*state, command) error),
     }
 
-    cmds.Register("login", config.HandlerLogin)
-    cmds.Register("register", config.HandlerRegister)
+    cmds.register("login", handlerLogin)
+    cmds.register("register", handlerRegister)
 
-    err = cmds.Run(state, cmd)
+    err = cmds.run(programState, cmd)
     if err != nil {
         log.Fatalf("Error runing command: %v", err)
     }

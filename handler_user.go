@@ -1,0 +1,50 @@
+package main
+
+import (
+	"context"
+	"fmt"
+	"time"
+	"strings"
+	"github.com/google/uuid"
+	"github.com/evanlin0514/aggregator/internal/database"
+)
+
+func handlerLogin(s *state, cmd command) error{
+	_, err := s.db.GetUser(context.Background(), cmd.args[0])
+	if err != nil{
+		return fmt.Errorf("no user found: %v", err)
+	}
+	s.pointer.SetUser(cmd.args[0])
+	fmt.Printf("successfully swtich to user: %v \n", cmd.args[0])
+	return nil
+}
+
+
+func handlerRegister(s *state, cmd command) error {
+	if len(cmd.args) != 1 {
+		return fmt.Errorf("usage: %s <name>", cmd.name)
+	}
+	username := cmd.args[0]
+
+	params := database.CreateUserParams{
+		ID: uuid.New(),
+		CreateAt: time.Now(),
+		UpdateAt: time.Now(),
+		Name: username,
+	}
+
+	newUser, err := s.db.CreateUser(context.Background(), params)
+	if err != nil {
+		if strings.Contains(err.Error(), "duplicate key"){
+			return fmt.Errorf("user already exists")
+		}
+		return fmt.Errorf("error creating user: %v", err)
+	}
+
+	if err := s.pointer.SetUser(username); err != nil{
+		return err
+	}
+
+	fmt.Printf("User created: %v\n", newUser.Name)
+	return nil
+}
