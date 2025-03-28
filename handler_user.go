@@ -1,12 +1,16 @@
 package main
 
 import (
+	"bytes"
 	"context"
+	"encoding/xml"
 	"fmt"
-	"time"
+	"io"
+	"net/http"
 	"strings"
-	"github.com/google/uuid"
+	"time"
 	"github.com/evanlin0514/aggregator/internal/database"
+	"github.com/google/uuid"
 )
 
 func handlerLogin(s *state, cmd command) error{
@@ -86,4 +90,27 @@ func handlerUsers(s *state, cmd command) error {
 	}
 
 	return nil
+}
+
+func fetchFeed(ctx context.Context, feedURL string) (*RSSFeed, error){
+	rss := &RSSFeed{}
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, feedURL, &bytes.Reader{})
+	if err != nil {
+		return rss, fmt.Errorf("error making new request: %v", err)
+	}
+
+	req.Header.Add("User-Agent", "gator")
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return rss, fmt.Errorf("error when GET: %v", err)
+	}
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return rss, fmt.Errorf("error reading Body: %v", err)
+	}
+	if err := xml.Unmarshal(body, rss); err != nil{
+		return rss, fmt.Errorf("error unmarshaling Body: %v", err)
+	}
+	return rss, nil
 }
