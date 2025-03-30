@@ -64,6 +64,18 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 	return i, err
 }
 
+const getId = `-- name: GetId :one
+SELECT id FROM users
+WHERE name = $1
+`
+
+func (q *Queries) GetId(ctx context.Context, name string) (uuid.UUID, error) {
+	row := q.db.QueryRowContext(ctx, getId, name)
+	var id uuid.UUID
+	err := row.Scan(&id)
+	return id, err
+}
+
 const getUser = `-- name: GetUser :many
 SELECT name FROM users
 `
