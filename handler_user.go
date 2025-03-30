@@ -1,12 +1,8 @@
 package main
 
 import (
-	"bytes"
 	"context"
-	"encoding/xml"
 	"fmt"
-	"io"
-	"net/http"
 	"strings"
 	"time"
 	"github.com/evanlin0514/aggregator/internal/database"
@@ -54,7 +50,7 @@ func handlerRegister(s *state, cmd command) error {
 }
 
 func handlerReset(s *state, cmd command) error {
-	if len(cmd.args) == 1 {
+	if len(cmd.args) > 0 {
 		return fmt.Errorf("invlid input")
 	}
 
@@ -68,7 +64,7 @@ func handlerReset(s *state, cmd command) error {
 }
 
 func handlerUsers(s *state, cmd command) error {
-	if len(cmd.args) == 1 {
+	if len(cmd.args) > 0 {
 		return fmt.Errorf("invlid input")
 	}	
 	
@@ -92,25 +88,18 @@ func handlerUsers(s *state, cmd command) error {
 	return nil
 }
 
-func fetchFeed(ctx context.Context, feedURL string) (*RSSFeed, error){
-	rss := &RSSFeed{}
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, feedURL, &bytes.Reader{})
-	if err != nil {
-		return rss, fmt.Errorf("error making new request: %v", err)
+func handlerAgg (s *state, cmd command) error {
+	if len(cmd.args) > 0 {
+		return fmt.Errorf("invlid input")
 	}
 
-	req.Header.Add("User-Agent", "gator")
-	resp, err := http.DefaultClient.Do(req)
-	if err != nil {
-		return rss, fmt.Errorf("error when GET: %v", err)
-	}
+	rss, err := fetchFeed(context.Background(), "https://www.wagslane.dev/index.xml")
+    if err != nil {
+        return fmt.Errorf("error fetching feed: %v", err)
+    }
 
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return rss, fmt.Errorf("error reading Body: %v", err)
-	}
-	if err := xml.Unmarshal(body, rss); err != nil{
-		return rss, fmt.Errorf("error unmarshaling Body: %v", err)
-	}
-	return rss, nil
+	fmt.Println(rss)
+	return nil
 }
+
+

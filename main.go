@@ -14,22 +14,6 @@ type state struct{
     pointer *config.Config
 }
 
-type RSSFeed struct {
-	Channel struct {
-		Title       string    `xml:"title"`
-		Link        string    `xml:"link"`
-		Description string    `xml:"description"`
-		Item        []RSSItem `xml:"item"`
-	} `xml:"channel"`
-}
-
-type RSSItem struct {
-	Title       string `xml:"title"`
-	Link        string `xml:"link"`
-	Description string `xml:"description"`
-	PubDate     string `xml:"pubDate"`
-}
-
 func main() {
     file, err := config.Read()
     if err != nil {
@@ -48,7 +32,6 @@ func main() {
         db: dbQueries,
     }
 
-
     input := os.Args
     cmd := command{
         name: input[1],
@@ -63,6 +46,7 @@ func main() {
     cmds.register("register", handlerRegister)
     cmds.register("reset", handlerReset)
     cmds.register("users", handlerUsers)
+    cmds.register("agg", handlerAgg)
 
     err = cmds.run(programState, cmd)
     if err != nil {
