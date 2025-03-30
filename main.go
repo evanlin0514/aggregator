@@ -48,6 +48,7 @@ func main() {
     cmds.register("users", handlerUsers)
     cmds.register("agg", handlerAgg)
     cmds.register("addfeed", handlerFeed)
+    cmds.register("feeds", handlerFeeds)
 
     err = cmds.run(programState, cmd)
     if err != nil {

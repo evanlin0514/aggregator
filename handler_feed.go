@@ -42,5 +42,4 @@ func printFeed(feed database.Feed) {
 	fmt.Printf("Name:			  %s\n", feed.Name)
 	fmt.Printf("Url:			   %s\n", feed.Url)
 	fmt.Printf("User ID:		   %s\n", feed.UserID)
-
 }
