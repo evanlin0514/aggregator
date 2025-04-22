@@ -32,6 +32,16 @@ func handlerFeed (s *state, cmd command) error {
 	}
 
 	printFeed(feed)
+
+	param := database.CreateFeedFollowParams{
+		UserID: user_id,
+		FeedID: feed.ID,
+	}
+
+	_, err = s.db.CreateFeedFollow(context.Background(), param)
+	if err != nil {
+		return fmt.Errorf("error create feed follow: %v", err)
+	}
 	return nil
 }
 
